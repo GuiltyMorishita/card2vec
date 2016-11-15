@@ -10,38 +10,33 @@ mecab = MeCab.Tagger("-Owakati")
 names = []
 text = ""
 texts = []
-with open("hs_card_list.json", "r") as file:
-    hs_card_dict = json.load(file)
-    for card in hs_card_dict:
-        names.append(card["name"])
-        mecab_result = mecab.parse(card["card_text"])
-        if mecab_result is False:
-            text += "\n"
-            texts.append("")
-        else:
-            text += mecab_result
-            texts.append(card["card_text"])
+with open("yugioh/yugioh.json", "r") as file:
+    card_dict = json.load(file)
+    for card in card_dict:
+        if card["name"] not in names:
+            names.append(card["name"])
+            mecab_result = mecab.parse(card["text"])
+            if mecab_result is False:
+                text += "\n"
+                texts.append("")
+            else:
+                text += mecab_result
+                texts.append(card["text"])
 
-# with open("card_text.txt", "w") as file:
-#     file.write(text)
+    print(len(texts))
+
+with open("yugioh_card_text.txt", "w") as file:
+    file.write(text)
 
 # カードテキスト読み込み
-card_text = doc2vec.TaggedLineDocument("card_text.txt")
+card_text = doc2vec.TaggedLineDocument("yugioh_card_text.txt")
 model = doc2vec.Doc2Vec(card_text, size=100, window=8, min_count=2, workers=4)
 
-model.save("hs.model")
-model.save_word2vec_format("hs.w2vmodel")
-
-# # ここから単語同士の類似度
-# word = u'武器'  # 類似単語を求めたい単語
-# print(word + ' is similar to...')
-# # 類似単語と類似度のタプル（類似度上位10件）のリストを受け取る
-# for similarity in model.most_similar(positive=word):
-#     # タプルのままIPythonに出力するとリテラル表示されないのでこの書き方
-#     print(similarity[0], similarity[1])
+model.save("yugioh.model")
+model.save_word2vec_format("yugioh.w2vmodel")
 
 # 類似カードを求めたいカード名
-target_card_name = u"土蜘蛛"
+target_card_name = u"エフェクト・ヴェーラー"
 card_index = names.index(target_card_name)
 
 # 類似カードと類似度のタプル（類似度上位10件）のリストを受け取る

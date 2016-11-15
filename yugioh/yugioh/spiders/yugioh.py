@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.spiders import Rule
-from scrapy.linkextractors import LinkExtractor
 from ..items import YugiohItem
 from bs4 import BeautifulSoup
 from more_itertools import chunked
@@ -9,21 +7,32 @@ import re
 
 class YugiohSpider(scrapy.Spider):
     name = "yugioh"
-    allowed_domains = ["ocg-card.com"]
-    start_urls = ['http://ocg-card.com/list/']
+    allowed_domains = ["yugioh-list.com"]
+    root_url = 'http://yugioh-list.com'
 
-    rules = [
-        Rule(LinkExtractor(allow=r"/list/list"), follow=True),
-        Rule(LinkExtractor(allow=r"/list/list", unique=True), callback="parse")
-    ]
+    def start_requests(self):
+        yield scrapy.Request(self.root_url + "/c_lists", callback=self.start_requests_parse)
+
+    def start_requests_parse(self, response):
+        soup = BeautifulSoup(response.body, "lxml")
+        url_list = []
+        for link in soup.findAll("a"):
+            href = link.get("href")
+            if re.search(r"/p_dtls/index/\d+", href):
+                url = self.root_url + href
+                url_list.append(url)
+        target_urls = set(url_list)
+        for target_url in target_urls:
+            yield scrapy.Request(target_url, callback=self.parse)
 
     def parse(self, response):
         soup = BeautifulSoup(response.body, "lxml")
-        table_rows = soup.find("table", border=2).findAll("tr")
-        # cards = [(i+j) for (i, j) in zip(table_rows[::2], table_rows[1::2])]
-        del(table_rows[0])
-        for upper, lower in chunked(table_rows, 2):
+        title = soup.find("div", class_="pack_detail").find("img").get("title")
+        print(title)
+        table_rows = soup.find("table", class_="tableList scroll-box").findAll("tr")
+        card_rows = table_rows[1:-1]
+        for upper, lower in chunked(card_rows, 2):
             item = YugiohItem()
-            item['name'] = upper.findAll("td")[1].text
-            item['text'] = lower.find("td").text
+            item['name'] = upper.findAll("td")[3].text.rstrip()
+            item['text'] = lower.find("span").text.rstrip()
             yield item
