@@ -2,46 +2,58 @@
 import json
 import MeCab
 from gensim.models import doc2vec
+import os
 
 
-mecab = MeCab.Tagger("-Owakati")
+def load_json(target_game_name):
+    # カード名とカードテキストの入力データ作成
+    names = []
+    text = ""
+    texts = []
+    mecab = MeCab.Tagger("-Owakati")
+    json_path = target_game_name + "/" + target_game_name + ".json"
+    with open(json_path, "r") as file:
+        card_dict = json.load(file)
+        for card in card_dict:
+            if card["name"] not in names:
+                names.append(card["name"])
+                mecab_result = mecab.parse(card["text"])
+                if mecab_result is False:
+                    text += "\n"
+                    texts.append("")
+                else:
+                    text += mecab_result
+                    texts.append(card["text"])
 
-target_game_name = "yugioh"
+    with open(target_game_name + ".txt", "w") as file:
+        file.write(text)
 
-# カード名とカードテキストの入力データ作成
-names = []
-text = ""
-texts = []
+    return names, texts
 
-json_path = target_game_name + "/" + target_game_name + ".json"
-with open(json_path, "r") as file:
-    card_dict = json.load(file)
-    for card in card_dict:
-        if card["name"] not in names:
-            names.append(card["name"])
-            mecab_result = mecab.parse(card["text"])
-            if mecab_result is False:
-                text += "\n"
-                texts.append("")
-            else:
-                text += mecab_result
-                texts.append(card["text"])
+def generate_doc2vec_model(target_game_name):
+    print("Training Start")
+    # カードテキスト読み込み
+    card_text = doc2vec.TaggedLineDocument(target_game_name + ".txt")
+    # 学習
+    model = doc2vec.Doc2Vec(card_text, size=300, window=15, min_count=1, workers=4,
+                            sample=0.00001, negative=5, iter=400)
+    # モデルの保存
+    model.save(target_game_name + ".model")
+    print("Training Finish")
+    return model
 
-    print(len(texts))
 
-with open(target_game_name + ".txt", "w") as file:
-    file.write(text)
+TARGET_GAME_NAME = "yugioh"
+names, texts = load_json(TARGET_GAME_NAME)
 
-# カードテキスト読み込み
-card_text = doc2vec.TaggedLineDocument(target_game_name + ".txt")
-model = doc2vec.Doc2Vec(card_text, size=100, window=8, min_count=2, workers=4)
-
-model.save(target_game_name + ".model")
-model.save_word2vec_format(target_game_name + ".w2vmodel")
+if os.path.isfile(TARGET_GAME_NAME + ".model") is True:
+    model = doc2vec.Doc2Vec.load(TARGET_GAME_NAME + ".model")
+else:
+    model = generate_doc2vec_model(TARGET_GAME_NAME)
 
 # 類似カードを求めたいカード名
-target_card_name = u"エフェクト・ヴェーラー"
-card_index = names.index(target_card_name)
+TARGET_CARD_NAME = u"エフェクト・ヴェーラー"
+card_index = names.index(TARGET_CARD_NAME)
 
 # 類似カードと類似度のタプル（類似度上位10件）のリストを受け取る
 similar_docs = model.docvecs.most_similar(card_index)
