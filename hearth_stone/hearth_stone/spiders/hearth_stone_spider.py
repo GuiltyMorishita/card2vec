@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 
 class HearthStoneSpiderSpider(scrapy.Spider):
-    name = "hearth_stone_spider"
+    name = "hearth_stone"
     allowed_domains = ["4gamer.net"]
     start_urls = ['http://www.4gamer.net/games/209/G020915/FC20140702001/']
 
@@ -20,7 +20,7 @@ class HearthStoneSpiderSpider(scrapy.Spider):
             item['type'] = card.find("span", class_="type").string
             item['hero'] = card.find("span", class_="class").string
             item['race'] = card.find("span", class_="race").string
-            item['card_text'] = card.find("span", class_="card_comment").find("p").string
+            item['text'] = card.find("span", class_="card_comment").find("p").string
             item['mana'] = card.find("span", class_="mana").string
             item['attack'] = card.find("span", class_="attack").string
             item['health'] = card.find("span", class_="health").string

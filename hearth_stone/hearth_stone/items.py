@@ -10,7 +10,7 @@ class HearthStoneItem(scrapy.Item):
     type = scrapy.Field()
     hero = scrapy.Field()
     race = scrapy.Field()
-    card_text = scrapy.Field()
+    text = scrapy.Field()
     mana = scrapy.Field()
     attack = scrapy.Field()
     health = scrapy.Field()
