@@ -6,11 +6,15 @@ from gensim.models import doc2vec
 
 mecab = MeCab.Tagger("-Owakati")
 
+target_game_name = "yugioh"
+
 # カード名とカードテキストの入力データ作成
 names = []
 text = ""
 texts = []
-with open("yugioh/yugioh.json", "r") as file:
+
+json_path = target_game_name + "/" + target_game_name + ".json"
+with open(json_path, "r") as file:
     card_dict = json.load(file)
     for card in card_dict:
         if card["name"] not in names:
@@ -25,15 +29,15 @@ with open("yugioh/yugioh.json", "r") as file:
 
     print(len(texts))
 
-with open("yugioh_card_text.txt", "w") as file:
+with open(target_game_name + ".txt", "w") as file:
     file.write(text)
 
 # カードテキスト読み込み
-card_text = doc2vec.TaggedLineDocument("yugioh_card_text.txt")
+card_text = doc2vec.TaggedLineDocument(target_game_name + ".txt")
 model = doc2vec.Doc2Vec(card_text, size=100, window=8, min_count=2, workers=4)
 
-model.save("yugioh.model")
-model.save_word2vec_format("yugioh.w2vmodel")
+model.save(target_game_name + ".model")
+model.save_word2vec_format(target_game_name + ".w2vmodel")
 
 # 類似カードを求めたいカード名
 target_card_name = u"エフェクト・ヴェーラー"

@@ -4,8 +4,8 @@ from ..items import HearthStoneItem
 from bs4 import BeautifulSoup
 
 
-class HsSpiderSpider(scrapy.Spider):
-    name = "hs_spider"
+class HearthStoneSpiderSpider(scrapy.Spider):
+    name = "hearth_stone_spider"
     allowed_domains = ["4gamer.net"]
     start_urls = ['http://www.4gamer.net/games/209/G020915/FC20140702001/']
 
