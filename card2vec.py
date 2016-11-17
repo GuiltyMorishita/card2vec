@@ -37,10 +37,12 @@ def generate_doc2vec_model(target_game_name):
     # カードテキスト読み込み
     card_text = doc2vec.TaggedLineDocument(target_game_name + ".txt")
     # 学習
-    # model = doc2vec.Doc2Vec(card_text, size=300, window=12, min_count=1, workers=4,
-    #                         sample=0.00001, negative=5, iter=400)
-    # model = doc2vec.Doc2Vec(card_text, size=100, window=9, min_count=1, workers=4, iter=100)
-    model = doc2vec.Doc2Vec(card_text, size=200, window=5, min_count=1, workers=4, iter=20, dm=0)
+    # model = doc2vec.Doc2Vec(card_text, size=300, window=12, min_count=1,
+    #                         workers=4, sample=0.00001, negative=5, iter=400)
+    # model = doc2vec.Doc2Vec(card_text, size=100, window=9, min_count=1,
+    #                         workers=4, iter=100)
+    model = doc2vec.Doc2Vec(card_text, size=200, window=5, min_count=1,
+                            workers=4, iter=20, dm=0)
 
     # モデルの保存
     model.save(target_game_name + ".model")
