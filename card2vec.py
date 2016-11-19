@@ -50,24 +50,25 @@ def generate_doc2vec_model(target_game_name):
     return model
 
 
-TARGET_GAME_NAME = "yugioh"
-names, texts = load_json(TARGET_GAME_NAME)
+if __name__ == '__main__':
+    TARGET_GAME_NAME = "yugioh"
+    names, texts = load_json(TARGET_GAME_NAME)
 
-if os.path.isfile(TARGET_GAME_NAME + ".model") is True:
-    model = doc2vec.Doc2Vec.load(TARGET_GAME_NAME + ".model")
-else:
-    model = generate_doc2vec_model(TARGET_GAME_NAME)
+    if os.path.isfile(TARGET_GAME_NAME + ".model") is True:
+        model = doc2vec.Doc2Vec.load(TARGET_GAME_NAME + ".model")
+    else:
+        model = generate_doc2vec_model(TARGET_GAME_NAME)
 
-# 類似カードを求めたいカード名
-# TARGET_CARD_NAME = u"手動操縦のシュレッダー"
-TARGET_CARD_NAME = names[random.randint(0, len(names))]
-card_index = names.index(TARGET_CARD_NAME)
+    # 類似カードを求めたいカード名
+    # TARGET_CARD_NAME = u"手動操縦のシュレッダー"
+    TARGET_CARD_NAME = names[random.randint(0, len(names))]
+    card_index = names.index(TARGET_CARD_NAME)
 
-# 類似カードと類似度のタプル（類似度上位10件）のリストを受け取る
-similar_docs = model.docvecs.most_similar(card_index)
-print(names[card_index])
-print(texts[card_index])
-print(" is similar to...\n")
-for similar_doc in similar_docs:
-    print(names[similar_doc[0]] + " " + str(similar_doc[1]))
-    print(texts[similar_doc[0]], "\n")
+    # 類似カードと類似度のタプル（類似度上位10件）のリストを受け取る
+    similar_docs = model.docvecs.most_similar(card_index)
+    print(names[card_index])
+    print(texts[card_index])
+    print(" is similar to...\n")
+    for similar_doc in similar_docs:
+        print(names[similar_doc[0]] + " " + str(similar_doc[1]))
+        print(texts[similar_doc[0]], "\n")
